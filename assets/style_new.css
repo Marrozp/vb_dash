@@ -1,0 +1,179 @@
+body {
+    padding: 0 0 50px 50px;
+    margin: 0 auto;
+    /*background-color: #EAEEF7;*/
+    background-color: #162B46;
+    width: 1030px;
+    color: white;
+}
+
+html {
+    height: 1600px;
+    font-family: Arial;
+    background-color: #EAEEF7;
+}
+
+.flex-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.flex-row {
+    display: flex;
+    align-items: center;
+}
+
+.slider-h {
+    justify-content: space-around;
+}
+
+.slider-h p {
+    margin: 10px 0;
+}
+
+.red-text {
+    color: rgb(226, 71, 71);
+}
+
+.updown {
+    transform: rotate(180deg);
+}
+
+.top-h-h {
+    display: flex;
+    margin-top: 60px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.h-bar {
+    height: 66px;
+    width: 5px;
+    background-color: #54e9dc;
+}
+
+.top-h-text-h  {
+    padding-left: 30px;
+}
+
+.top-h-text-h p {
+    font-size: 12px;
+    margin: 0 10px 0 0;
+}
+
+.picker-h {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.filters-h {
+    display: flex;
+    gap: 25px;
+    flex-wrap: wrap;
+}
+
+/*
+.first-chart-h {
+    padding-left: 50px;
+}
+*/
+
+h1 {
+    font-size: 36px;
+    padding: 0;
+    margin: 0;
+}
+
+.picker {
+    width: 250px;
+    border-radius: 12px;
+    color: black;
+}
+
+.picker * {
+    font-size: 12px;
+}
+
+.Select-control {
+    border: 1px solid grey;
+}
+
+.first-chart-div-h {
+    width: 980px;
+    height: 420px;
+    background-color: white;
+    display: flex;
+    margin-top: 15px;
+    border-radius: 4px;
+}
+
+#graph-content {
+    margin: auto;
+}
+
+.first-chart-div-h {
+    overflow-y: scroll;
+}
+
+h2 {
+    margin-bottom: 5px;
+    font-size: 18px;
+}
+
+.sec-chart-h {
+    margin-top: 50px;
+}
+
+.date-picker {
+    width: 210px;
+    height: 34px;
+    border-radius: 12px;
+}
+
+.SingleDatePicker, .SingleDatePickerInput, .DateInput, .DateInput_input {
+    width: 210px;
+    height: 34px;
+    border-radius: 4px;
+}
+
+.date-picker * {
+    font-size: 12px;
+}
+
+#graph-content-comp {
+    margin: auto;
+}
+
+input[type=checkbox] {
+    transform: scale(1.5);
+    margin: 8px;
+}
+
+#dd-dimension, #dd-metric {
+    margin-top: 5px;
+}
+
+.setup-h {
+    display: flex;
+}
+
+/* width */
+::-webkit-scrollbar {
+    width: 10px;
+}
+  
+/* Track */
+::-webkit-scrollbar-track {
+    background: #162B46;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #54e9dc;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #32a69c;
+}
