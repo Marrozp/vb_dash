@@ -20,6 +20,8 @@ def parse_industries(column):
 
 app = Dash(__name__)
 
+server = app.server
+
 app.layout = html.Div(
     [html.Div([
         html.Div([
