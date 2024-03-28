@@ -6,10 +6,11 @@ import pandas as pd
 import numpy as np
 pd.options.display.multi_sparse = False
 
-df = pd.read_csv('data_demo.csv')
+df = pd.read_csv('data_custom_fields.csv')
 
 df['date'] = pd.to_datetime(df['cut_of_date'], utc=True)
 df = df[df['display_name'] != 'Papaya Global (original investment in Azimo)']
+df['program'] = df['program'].str.replace('[\[\]"]', '', regex=True)
 
 def parse_industries(column):
     column = column.str.replace('[\[\]"]', '', regex=True)
@@ -38,16 +39,16 @@ app.layout = html.Div(
                     dcc.Dropdown(options=[
                         {'label': 'MOIC', 'value': 'first_check_mo_ic'},
                         {'label': 'IRR', 'value': 'irr'},
-                        {'label': 'Multiple', 'value': 'multiple'},
-                        {'label': 'TVPI', 'value': 'multiple'},
-                        {'label': 'DPI', 'value': 'multiple'},
-                        {'label': 'RVPI', 'value': 'multiple'},
-                        {'label': 'Initial investment', 'value': 'multiple'},
-                        {'label': 'Follow on investment', 'value': 'multiple'},
-                        {'label': 'Total original cost', 'value': 'multiple'},
-                        {'label': 'Current Cost', 'value': 'multiple'},
-                        {'label': 'Fair Value', 'value': 'multiple'},
-                        {'label': 'Proceeds from exits and repayment', 'value': 'multiple'}
+                        {'label': 'Multiple', 'value': 'multiple'}#,
+                        #{'label': 'TVPI', 'value': 'multiple'},
+                        #{'label': 'DPI', 'value': 'multiple'},
+                        #{'label': 'RVPI', 'value': 'multiple'},
+                        #{'label': 'Initial investment', 'value': 'multiple'},
+                        #{'label': 'Follow on investment', 'value': 'multiple'},
+                        #{'label': 'Total original cost', 'value': 'multiple'},
+                        #{'label': 'Current Cost', 'value': 'multiple'},
+                        #{'label': 'Fair Value', 'value': 'multiple'},
+                        #{'label': 'Proceeds from exits and repayment', 'value': 'multiple'}
                     ], id='dd-metric', className='picker', value='first_check_mo_ic')
                 ], className='flex-col'),
                 html.Div([
@@ -58,13 +59,14 @@ app.layout = html.Div(
                         {'label': 'Fund', 'value': 'fund_name'},
                         {'label': 'Country', 'value': 'domicile_country'},
                         {'label': 'Entry Round', 'value': 'entry_round'},
-                        {'label': 'Investment manager', 'value': 'entry_round'},
-                        {'label': 'Source of introduction', 'value': 'entry_round'},
-                        {'label': 'Board seats', 'value': 'entry_round'},
-                        {'label': 'Board member', 'value': 'entry_round'},
-                        {'label': 'Prominent angel investor', 'value': 'entry_round'},
-                        {'label': 'Primary commercial model', 'value': 'entry_round'},
-                        {'label': 'Fund programme', 'value': 'entry_round'}
+                        {'label': 'Program', 'value': 'program'}
+                        #{'label': 'Investment manager', 'value': 'entry_round'},
+                        #{'label': 'Source of introduction', 'value': 'entry_round'},
+                        #{'label': 'Board seats', 'value': 'entry_round'},
+                        #{'label': 'Board member', 'value': 'entry_round'},
+                        #{'label': 'Prominent angel investor', 'value': 'entry_round'},
+                        #{'label': 'Primary commercial model', 'value': 'entry_round'},
+                        #{'label': 'Fund programme', 'value': 'entry_round'}
                     ], id='dd-dimension', className='picker', value='display_name')
                 ], className='flex-col')
             ], className='filters-h'),
@@ -106,6 +108,14 @@ app.layout = html.Div(
                     ], className='picker', value='include', id='entry_round-cond'),
                     dcc.Dropdown(df['entry_round'].dropna().unique(), id='filter-entry', className='picker', multi=True, placeholder='Select Entry Round')
                 ], className='flex-col'),
+                html.Div([
+                    # boolslider inserted down
+                    dcc.Dropdown(options=[
+                        {'label': 'Include', 'value': 'include'},
+                        {'label': 'Exclude', 'value': 'exclude'},
+                    ], className='picker', value='include', id='program-cond'),
+                    dcc.Dropdown(df['program'].dropna().unique(), id='filter-program', className='picker', multi=True, placeholder='Select Program')
+                ], className='flex-col')
             ], className='filters-h'),
             html.H2('Select order'),
             dcc.Dropdown(options=[
@@ -147,21 +157,23 @@ app.layout = html.Div(
     Input('filter-fund', 'value'),
     Input('filter-country', 'value'),
     Input('filter-entry', 'value'),
+    Input('filter-program', 'value'),
     Input('dd-order', 'value'),
 
     Input('industries-cond', 'value'),
     Input('display_name-cond', 'value'),
     Input('fund_name-cond', 'value'),
     Input('domicile_country-cond', 'value'),
-    Input('entry_round-cond', 'value')
+    Input('entry_round-cond', 'value'),
+    Input('program-cond', 'value')
 )
-def update_graph(metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, order,
-industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry_round_cond):
+def update_graph(metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, filter_program, order,
+industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry_round_cond, program_cond):
 
     dff = df.copy(deep=True)
 
-    dff = prepare_dataframe(dff, metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, order, None, None,
-    industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry_round_cond)
+    dff = prepare_dataframe(dff, metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, filter_program, order, None, None,
+    industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry_round_cond, program_cond)
 
     '''
     fig = px.bar(dff,
@@ -232,6 +244,7 @@ industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry
     Input('filter-fund', 'value'),
     Input('filter-country', 'value'),
     Input('filter-entry', 'value'),
+    Input('filter-program', 'value'),
     Input('dd-order', 'value'),
     Input('comp-date', 'date'),
     Input('cl-diff', 'value'),
@@ -240,14 +253,15 @@ industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry
     Input('display_name-cond', 'value'),
     Input('fund_name-cond', 'value'),
     Input('domicile_country-cond', 'value'),
-    Input('entry_round-cond', 'value')
+    Input('entry_round-cond', 'value'),
+    Input('program-cond', 'value')
 )
-def update_comp_graph(metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, order, date, difference,
-industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry_round_cond):
+def update_comp_graph(metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, filter_program, order, date, difference,
+industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry_round_cond, program_cond):
 
     dff = df.copy(deep=True)
-    dff = prepare_dataframe(dff, metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, order, date, difference,
-    industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry_round_cond)
+    dff = prepare_dataframe(dff, metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, filter_program, order, date, difference,
+    industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry_round_cond, program_cond)
     
     '''
     fig = px.bar(dff,
@@ -332,9 +346,13 @@ def formatFigure(dff, metric, dimension):
             font=dict(color='black', size=14)
         )
 
+    height_preset = 20 if dff.shape[0]==0 else 150 if dff.shape[0]<3 else 100 if dff.shape[0]<6 else 50
+    height_multiplicator = dff.shape[0] if dff.shape[0] != 0 else 1
+
     fig.update_layout(
         width = 950,
-        height = dff.shape[0]*(150 if dff.shape[0]<3 else 100 if dff.shape[0]<6 else 50 ),
+        #height = dff.shape[0]*(150 if dff.shape[0]<3 else 100 if dff.shape[0]<6 else 50 ),
+        height = height_multiplicator * height_preset,
         showlegend=False,
         yaxis_title='',
         xaxis_title='',
@@ -372,18 +390,19 @@ def create_groupby_object(dimension, metric):
             'display_name': lambda x: ',<br>    '.join(x.unique()),
             'fund_name': lambda x: ',<br>    '.join(x.unique()),
             'domicile_country': lambda x: ',<br>    '.join(x.unique()),
-            'entry_round': lambda x: ',<br> '.join(x.dropna().unique()) if x.dropna().any() else ''
+            'entry_round': lambda x: ',<br> '.join(x.dropna().unique()) if x.dropna().any() else '',
+            'program': lambda x: ',<br>    '.join(x.unique())
             }
     object_to_return.pop(dimension)
     return object_to_return
 
-def prepare_dataframe(dff, metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, order, date, difference,
-industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry_round_cond):
+def prepare_dataframe(dff, metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, filter_program, order, date, difference,
+industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry_round_cond, program_cond):
     dff = dff.copy(deep=True)
     #print(date)
     if difference:
-        actual_dff = prepare_dataframe(dff, metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, order, None, None,
-    industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry_round_cond)
+        actual_dff = prepare_dataframe(dff, metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, filter_program, order, None, None,
+    industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry_round_cond, program_cond)
 
     if date:        
         dff = dff.loc[(dff['cut_of_date'] <= date)]
@@ -401,6 +420,11 @@ industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry
             dff = dff[dff.fund_name.isin(filter_funds)]
         else:
             dff = dff[~dff.fund_name.isin(filter_funds)]
+    if filter_program:
+        if program_cond == 'include':
+            dff = dff[dff.program.isin(filter_program)]
+        else:
+            dff = dff[~dff.program.isin(filter_program)]
     if filter_countries:
         if domicile_country_cond == 'include':
             dff = dff[dff.domicile_country.isin(filter_countries)]
