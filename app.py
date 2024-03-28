@@ -328,7 +328,7 @@ def formatFigure(dff, metric, dimension):
         title='Drilldown',
         barmode='stack',
         color=metric,
-        custom_data=['industries', 'fund_name', 'domicile_country', 'entry_round', 'display_name']
+        custom_data=['industries', 'fund_name', 'domicile_country', 'entry_round', 'display_name', 'program']
     )
 
     for i in range(len(dff)):
@@ -377,6 +377,7 @@ def formatFigure(dff, metric, dimension):
             "<b>Country</b>: %{customdata[2]}",
             "<b>Entry Round</b>: %{customdata[3]}",
             "<b>Company</b>: %{customdata[4]}",
+            "<b>Program</b>: %{customdata[5]}",
         ])
     )
 
@@ -391,7 +392,8 @@ def create_groupby_object(dimension, metric):
             'fund_name': lambda x: ',<br>    '.join(x.unique()),
             'domicile_country': lambda x: ',<br>    '.join(x.unique()),
             'entry_round': lambda x: ',<br> '.join(x.dropna().unique()) if x.dropna().any() else '',
-            'program': lambda x: ',<br>    '.join(x.unique())
+            'program': lambda x: ',<br> '.join(map(str, str(x.dropna().unique()).replace('[', '').replace(']', '').replace("'", '').split(' ')))
+            #str(x.dropna().unique()).split(' ') #',<br>    '.join(str(x.dropna().unique()))
             }
     object_to_return.pop(dimension)
     return object_to_return
