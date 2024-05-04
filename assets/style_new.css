@@ -1,9 +1,11 @@
 body {
-    padding: 0 0 50px 50px;
-    margin: 0 auto;
+    /*padding: 0 0 50px 50px;*/
+    padding: 0;
+    /*margin: 0 auto;*/
+    margin: 0;
     /*background-color: #EAEEF7;*/
     background-color: #162B46;
-    width: 1030px;
+    /*width: 1030px;*/
     color: white;
 }
 
@@ -11,6 +13,63 @@ html {
     height: 1600px;
     font-family: Arial;
     background-color: #EAEEF7;
+}
+
+.main {
+    display: flex;
+}
+
+.left-panel {
+    min-width: 250px;
+    background-color: #F7F9FC;
+    color: black;
+}
+
+.right-panel {
+    padding: 30px;
+}
+
+.btn-roll-out,  .btn-roll-in {
+    width: 250px;
+    height: 40px;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    text-align: left;
+    padding-left: 25px;
+}
+
+.btn-roll-in {
+    background-color: #F7F9FC;
+}
+
+.filters-head {
+    font-size: 26px;
+    padding: 20px 25px;
+    
+}
+
+hr {
+    width: 80%;
+    margin: 0 auto;
+}
+
+/*.chckl-list {
+    height: 300px;
+    overflow-y: scroll;
+}*/
+
+.chckl-list-hidden {
+    display: none;
+}
+
+.chckl-list-hidden, .chckl-list, .check-all-btn, .check-all-btn-hidden {
+    font-size: 12px;
+}
+
+.chckall {
+    font-weight: bold;
+    width: 100%;
 }
 
 .flex-col {
@@ -158,6 +217,17 @@ input[type=checkbox] {
     display: flex;
 }
 
+.check-all-btn {
+    width: 150px;
+    font-weight: bold;
+}
+
+.check-all-btn-hidden {
+    width: 150px;
+    display: none;
+    font-weight: bold;
+}
+
 /* width */
 ::-webkit-scrollbar {
     width: 10px;
@@ -177,3 +247,4 @@ input[type=checkbox] {
 ::-webkit-scrollbar-thumb:hover {
     background: #32a69c;
 }
+
