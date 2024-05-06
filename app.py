@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 pd.options.display.multi_sparse = False
 
-df = pd.read_csv('data_custom_fields.csv')
+df = pd.read_csv('custom_fields_and_new_metrics.csv')
 
 df['date'] = pd.to_datetime(df['cut_of_date'], utc=True)
 df = df[df['display_name'] != 'Papaya Global (original investment in Azimo)']
@@ -21,8 +21,6 @@ df['program'].fillna('None', inplace=True)
 # Add None industry to all industry-less companies
 #df['industries'] = df['industries'].apply(lambda x: ['None'] if x == [] else x)
 #df.loc[df['industries'] == [], 'industries'] = ['None']
-
-print(df[df['display_name']=='Storm Ventures']['industries'])
 
 def parse_industries(column):
     column = column.str.replace('[\[\]"]', '', regex=True)
@@ -145,7 +143,11 @@ app.layout = html.Div(
                         dcc.Dropdown(options=[
                             #{'label': 'MOIC', 'value': 'first_check_mo_ic'},
                             {'label': 'IRR', 'value': 'irr'},
-                            {'label': 'Multiple', 'value': 'multiple'}#,
+                            {'label': 'Multiple', 'value': 'multiple'},
+                            {'label': 'AVG Round Size', 'value': 'round_size'},
+                            {'label': 'AVG Pre Money', 'value': 'pre_money'},
+                            {'label': 'AVG Post Money', 'value': 'post_money'},
+                            {'label': 'AVG Ownership', 'value': 'ownership'}
                             #{'label': 'TVPI', 'value': 'multiple'},
                             #{'label': 'DPI', 'value': 'multiple'},
                             #{'label': 'RVPI', 'value': 'multiple'},
@@ -176,53 +178,53 @@ app.layout = html.Div(
                         ], id='dd-dimension', className='picker', value='display_name')
                     ], className='flex-col')
                 ], className='filters-h'),
-                html.H2('Apply filters'),
-                html.Div([
-                    html.Div([
-                        dcc.Dropdown(options=[
-                            {'label': 'Include', 'value': 'include'},
-                            {'label': 'Exclude', 'value': 'exclude'},
-                        ], className='picker', value='include', id='industries-cond'),
-                        dcc.Dropdown(list(parse_industries(df.industries)), id='filter-industries', className='picker', multi=True, placeholder='Select Industries')
-                    ], className='flex-col'),
-                    html.Div([
-                        dcc.Dropdown(options=[
-                            {'label': 'Include', 'value': 'include'},
-                            {'label': 'Exclude', 'value': 'exclude'},
-                        ], className='picker', value='include', id='display_name-cond'),
-                        dcc.Dropdown(df.display_name.unique(), id='filter-company', className='picker', multi=True, placeholder='Select Companies')
-                    ], className='flex-col'),
-                    html.Div([
-                        dcc.Dropdown(options=[
-                            {'label': 'Include', 'value': 'include'},
-                            {'label': 'Exclude', 'value': 'exclude'},
-                        ], className='picker', value='include', id='fund_name-cond'),
-                        dcc.Dropdown(df.fund_name.unique(), id='filter-fund', className='picker', multi=True, placeholder='Select Funds')
-                    ], className='flex-col'),
-                    html.Div([
-                        dcc.Dropdown(options=[
-                            {'label': 'Include', 'value': 'include'},
-                            {'label': 'Exclude', 'value': 'exclude'},
-                        ], className='picker', value='include', id='domicile_country-cond'),
-                        dcc.Dropdown(df.domicile_country.unique(), id='filter-country', className='picker', multi=True, placeholder='Select Countries')
-                    ], className='flex-col'),
-                    html.Div([
-                        # boolslider inserted down
-                        dcc.Dropdown(options=[
-                            {'label': 'Include', 'value': 'include'},
-                            {'label': 'Exclude', 'value': 'exclude'},
-                        ], className='picker', value='include', id='entry_round-cond'),
-                        dcc.Dropdown(df['entry_round'].dropna().unique(), id='filter-entry', className='picker', multi=True, placeholder='Select Entry Round')
-                    ], className='flex-col'),
-                    html.Div([
-                        dcc.Dropdown(options=[
-                            {'label': 'Include', 'value': 'include'},
-                            {'label': 'Exclude', 'value': 'exclude'},
-                        ], className='picker', value='include', id='program-cond'),
-                        dcc.Dropdown(df['program'].dropna().unique(), id='filter-program', className='picker', multi=True, placeholder='Select Program')
-                    ], className='flex-col'),
+            #     html.H2('Apply filters'),
+            #     html.Div([
+            #         html.Div([
+            #             dcc.Dropdown(options=[
+            #                 {'label': 'Include', 'value': 'include'},
+            #                 {'label': 'Exclude', 'value': 'exclude'},
+            #             ], className='picker', value='include', id='industries-cond'),
+            #             dcc.Dropdown(list(parse_industries(df.industries)), id='filter-industries', className='picker', multi=True, placeholder='Select Industries')
+            #         ], className='flex-col'),
+            #         html.Div([
+            #             dcc.Dropdown(options=[
+            #                 {'label': 'Include', 'value': 'include'},
+            #                 {'label': 'Exclude', 'value': 'exclude'},
+            #             ], className='picker', value='include', id='display_name-cond'),
+            #             dcc.Dropdown(df.display_name.unique(), id='filter-company', className='picker', multi=True, placeholder='Select Companies')
+            #         ], className='flex-col'),
+            #         html.Div([
+            #             dcc.Dropdown(options=[
+            #                 {'label': 'Include', 'value': 'include'},
+            #                 {'label': 'Exclude', 'value': 'exclude'},
+            #             ], className='picker', value='include', id='fund_name-cond'),
+            #             dcc.Dropdown(df.fund_name.unique(), id='filter-fund', className='picker', multi=True, placeholder='Select Funds')
+            #         ], className='flex-col'),
+            #         html.Div([
+            #             dcc.Dropdown(options=[
+            #                 {'label': 'Include', 'value': 'include'},
+            #                 {'label': 'Exclude', 'value': 'exclude'},
+            #             ], className='picker', value='include', id='domicile_country-cond'),
+            #             dcc.Dropdown(df.domicile_country.unique(), id='filter-country', className='picker', multi=True, placeholder='Select Countries')
+            #         ], className='flex-col'),
+            #         html.Div([
+            #             # boolslider inserted down
+            #             dcc.Dropdown(options=[
+            #                 {'label': 'Include', 'value': 'include'},
+            #                 {'label': 'Exclude', 'value': 'exclude'},
+            #             ], className='picker', value='include', id='entry_round-cond'),
+            #             dcc.Dropdown(df['entry_round'].dropna().unique(), id='filter-entry', className='picker', multi=True, placeholder='Select Entry Round')
+            #         ], className='flex-col'),
+            #         html.Div([
+            #             dcc.Dropdown(options=[
+            #                 {'label': 'Include', 'value': 'include'},
+            #                 {'label': 'Exclude', 'value': 'exclude'},
+            #             ], className='picker', value='include', id='program-cond'),
+            #             dcc.Dropdown(df['program'].dropna().unique(), id='filter-program', className='picker', multi=True, placeholder='Select Program')
+            #         ], className='flex-col'),
                     
-                ], className='filters-h'),
+            #     ], className='filters-h'),
                 html.H2('Select order'),
                 dcc.Dropdown(options=[
                     {'label': 'Descending', 'value': False},
@@ -231,6 +233,8 @@ app.layout = html.Div(
             ], className='picker-h'),
             html.Div([dcc.Graph(id='graph-content')], className='first-chart-div-h')
         ], className='first-chart-h'),
+        html.Div([], id='testing'),
+        #html.Div('No data found for this combination of filters', id='no-data-rect', className='no-data'),
         html.Div([
             html.Div([
                 html.H2('Select comparison period'),
@@ -258,35 +262,103 @@ app.layout = html.Div(
 
 @callback(
     Output('chckl-industries', 'value'),
-    Output('chckl-display_name', 'value'),
-    Output('chckl-fund_name', 'value'),
-    Output('chckl-domicile_country', 'value'),
-    Output('chckl-entry_round', 'value'),
-    Output('chckl-program', 'value'),
     Input('all-industries', 'value'),
+    State('chckl-industries', 'options')
+)
+def update_filter_industries(all_industries_value, chckl_industries_options):
+    if len(all_industries_value) > 0:
+        return [option["value"] for option in chckl_industries_options]
+    else:
+        return []
+
+@callback(
+    Output('chckl-display_name', 'value'),
     Input('all-display_name', 'value'),
+    State('chckl-display_name', 'options')
+)
+def update_filter_display_name(all_display_name_value, chckl_display_name_options):
+    if len(all_display_name_value) > 0:
+        return [option["value"] for option in chckl_display_name_options]
+    else:
+        return []
+
+@callback(
+    Output('chckl-fund_name', 'value'),
     Input('all-fund_name', 'value'),
+    State('chckl-fund_name', 'options')
+)
+def update_filter_fund_name(all_fund_name_value, chckl_fund_name_options):
+    if len(all_fund_name_value) > 0:
+        return [option["value"] for option in chckl_fund_name_options]
+    else:
+        return []
+
+@callback(
+    Output('chckl-domicile_country', 'value'),
     Input('all-domicile_country', 'value'),
+    State('chckl-domicile_country', 'options')
+)
+def update_filter_domicile_country(all_domicile_country_value, chckl_domicile_country_options):
+    if len(all_domicile_country_value) > 0:
+        return [option["value"] for option in chckl_domicile_country_options]
+    else:
+        return []
+
+@callback(
+    Output('chckl-entry_round', 'value'),
     Input('all-entry_round', 'value'),
+    State('chckl-entry_round', 'options')
+)
+def update_filter_entry_round(all_entry_round_value, chckl_entry_round_options):
+    if len(all_entry_round_value) > 0:
+        return [option["value"] for option in chckl_entry_round_options]
+    else:
+        return []
+
+@callback(
+    Output('chckl-program', 'value'),
     Input('all-program', 'value'),
-    State('chckl-industries', 'options'),
-    State('chckl-display_name', 'options'),
-    State('chckl-fund_name', 'options'),
-    State('chckl-domicile_country', 'options'),
-    State('chckl-entry_round', 'options'),
     State('chckl-program', 'options')
 )
-def update_filter(all_industries_value, all_companies_value, all_funds_value, all_countries_value, all_entry_rounds_value, all_programs_value,
-chckl_industries_options, chckl_companies_options, chckl_funds_options, chckl_countries_options, chckl_entry_rounds_options, chckl_programs_options):
-    all_buttons_value = [all_industries_value, all_companies_value, all_funds_value, all_countries_value, all_entry_rounds_value, all_programs_value]
-    all_chckl_options = [chckl_industries_options, chckl_companies_options, chckl_funds_options, chckl_countries_options, chckl_entry_rounds_options, chckl_programs_options]
-    result_arrays = []
-    for i in range(len(all_buttons_value)):
-        if len(all_buttons_value[i]) > 0:
-            result_arrays.append([option["value"] for option in all_chckl_options[i]])
-        else:
-            result_arrays.append([])
-    return result_arrays
+def update_filter_program(all_program_value, chckl_program_options):
+    if len(all_program_value) > 0:
+        return [option["value"] for option in chckl_program_options]
+    else:
+        return []
+
+
+# @callback(
+#     Output('chckl-industries', 'value'),
+#     Output('chckl-display_name', 'value'),
+#     Output('chckl-fund_name', 'value'),
+#     Output('chckl-domicile_country', 'value'),
+#     Output('chckl-entry_round', 'value'),
+#     Output('chckl-program', 'value'),
+#     Input('all-industries', 'value'),
+#     Input('all-display_name', 'value'),
+#     Input('all-fund_name', 'value'),
+#     Input('all-domicile_country', 'value'),
+#     Input('all-entry_round', 'value'),
+#     Input('all-program', 'value'),
+#     State('chckl-industries', 'options'),
+#     State('chckl-display_name', 'options'),
+#     State('chckl-fund_name', 'options'),
+#     State('chckl-domicile_country', 'options'),
+#     State('chckl-entry_round', 'options'),
+#     State('chckl-program', 'options')
+# )
+# def update_filter(all_industries_value, all_companies_value, all_funds_value, all_countries_value, all_entry_rounds_value, all_programs_value,
+# chckl_industries_options, chckl_companies_options, chckl_funds_options, chckl_countries_options, chckl_entry_rounds_options, chckl_programs_options):
+#     all_buttons_values = [all_industries_value, all_companies_value, all_funds_value, all_countries_value, all_entry_rounds_value, all_programs_value]
+#     all_chckl_options = [chckl_industries_options, chckl_companies_options, chckl_funds_options, chckl_countries_options, chckl_entry_rounds_options, chckl_programs_options]
+#     result_arrays = []
+#     print(all_buttons_values)
+#     for i in range(len(all_buttons_values)):
+#         if len(all_buttons_values[i]) > 0:
+#             result_arrays.append([option["value"] for option in all_chckl_options[i]])
+#         else:
+#             result_arrays.append([])
+#     return result_arrays
         
     # if len(all_industries_value) > 0:
     #     return [option["value"] for option in chckl_industries_options]
@@ -368,6 +440,8 @@ def update_roll_btn(n_click_industries, n_click_display_name, n_click_fund_name,
 
 @callback(
     Output('graph-content', 'figure'),
+    Output('testing', 'children'),
+    #Output()
     #Output('chckl-industries', 'value'),
     Input('dd-metric', 'value'),
     Input('dd-dimension', 'value'),
@@ -385,24 +459,31 @@ def update_roll_btn(n_click_industries, n_click_display_name, n_click_fund_name,
     # Input('filter-program', 'value'),
     Input('dd-order', 'value'),
 
-    Input('industries-cond', 'value'),
-    Input('display_name-cond', 'value'),
-    Input('fund_name-cond', 'value'),
-    Input('domicile_country-cond', 'value'),
-    Input('entry_round-cond', 'value'),
-    Input('program-cond', 'value')
+    # Input('industries-cond', 'value'),
+    # Input('display_name-cond', 'value'),
+    # Input('fund_name-cond', 'value'),
+    # Input('domicile_country-cond', 'value'),
+    # Input('entry_round-cond', 'value'),
+    # Input('program-cond', 'value')
 )
-def update_graph(metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, filter_program, order,
-industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry_round_cond, program_cond):
+def update_graph(metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, filter_program, order):
+# def update_graph(metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, filter_program, order,
+# industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry_round_cond, program_cond):
 
     dff = df.copy(deep=True)
 
-    dff = prepare_dataframe(dff, metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, filter_program, order, None, None,
-    industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry_round_cond, program_cond)
+    dff, empty_bool = prepare_dataframe(dff, metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, filter_program, order, None, None)
+    # dff = prepare_dataframe(dff, metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, filter_program, order, None, None,
+    # industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry_round_cond, program_cond)
     
-    #print(filter_industries)
+    if empty_bool:
+        no_data_rect_class = 'no-data-show'
+    else:
+        no_data_rect_class = 'no-data'
+    
+    print(no_data_rect_class)
 
-    return formatFigure(dff, metric, dimension)
+    return formatFigure(dff, metric, dimension), [html.Div('No data found for this combination of filters', id='no-data-rect', className=no_data_rect_class)]
 
 
 ############################################### Comparison Chart ############################################
@@ -411,29 +492,31 @@ industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry
     Output('graph-content-comp', 'figure'),
     Input('dd-metric', 'value'),
     Input('dd-dimension', 'value'),
-    Input('filter-industries', 'value'),
-    Input('filter-company', 'value'),
-    Input('filter-fund', 'value'),
-    Input('filter-country', 'value'),
-    Input('filter-entry', 'value'),
-    Input('filter-program', 'value'),
+    Input('chckl-industries', 'value'),
+    Input('chckl-display_name', 'value'),
+    Input('chckl-fund_name', 'value'),
+    Input('chckl-domicile_country', 'value'),
+    Input('chckl-entry_round', 'value'),
+    Input('chckl-program', 'value'),
     Input('dd-order', 'value'),
     Input('comp-date', 'date'),
     Input('cl-diff', 'value'),
 
-    Input('industries-cond', 'value'),
-    Input('display_name-cond', 'value'),
-    Input('fund_name-cond', 'value'),
-    Input('domicile_country-cond', 'value'),
-    Input('entry_round-cond', 'value'),
-    Input('program-cond', 'value')
+    # Input('industries-cond', 'value'),
+    # Input('display_name-cond', 'value'),
+    # Input('fund_name-cond', 'value'),
+    # Input('domicile_country-cond', 'value'),
+    # Input('entry_round-cond', 'value'),
+    # Input('program-cond', 'value')
 )
-def update_comp_graph(metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, filter_program, order, date, difference,
-industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry_round_cond, program_cond):
+def update_comp_graph(metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, filter_program, order, date, difference):
+# def update_comp_graph(metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, filter_program, order, date, difference,
+# industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry_round_cond, program_cond):
 
     dff = df.copy(deep=True)
-    dff = prepare_dataframe(dff, metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, filter_program, order, date, difference,
-    industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry_round_cond, program_cond)
+    dff, empty_bool = prepare_dataframe(dff, metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, filter_program, order, date, difference)
+    # dff = prepare_dataframe(dff, metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, filter_program, order, date, difference,
+    # industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry_round_cond, program_cond)
     
 
     return formatFigure(dff, metric, dimension)
@@ -502,7 +585,8 @@ def formatFigure(dff, metric, dimension):
 
 
 def create_groupby_object(dimension, metric):
-    object_to_return = {metric: 'sum',
+    object_to_return = {#metric: 'sum',
+            metric: 'sum' if metric not in ['round_size', 'pre_money', 'post_money', 'ownership'] else 'mean',
             #'industries': lambda x: ',<br>    '.join(x.unique()),
             'industries': lambda x: ',<br>    '.join(map(str, set([item for sublist in x for item in sublist]))),
             'display_name': lambda x: ',<br>    '.join(x.unique()),
@@ -515,13 +599,13 @@ def create_groupby_object(dimension, metric):
     object_to_return.pop(dimension)
     return object_to_return
 
-def prepare_dataframe(dff, metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, filter_program, order, date, difference,
-industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry_round_cond, program_cond):
+def prepare_dataframe(dff, metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, filter_program, order, date, difference):
+    # TODO: Empty dff might be still problem when using the comparison date - fix it
     dff = dff.copy(deep=True)
+    dff_never_empty = dff.copy(deep=True)
     #print(date)
     if difference:
-        actual_dff = prepare_dataframe(dff, metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, filter_program, order, None, None,
-    industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry_round_cond, program_cond)
+        actual_dff = prepare_dataframe(dff, metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, filter_program, order, None, None)
 
     if date:        
         dff = dff.loc[(dff['cut_of_date'] <= date)]
@@ -530,40 +614,22 @@ industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry
     dff['industries'] = dff['industries'].str.split(',')
 
     if filter_companies:
-        if display_name_cond == 'include':
-            dff = dff[dff.display_name.isin(filter_companies)]
-        else:
-            dff = dff[~dff.display_name.isin(filter_companies)]
+        dff = dff[dff.display_name.isin(filter_companies)]
     if filter_funds:
-        if fund_name_cond == 'include':
-            dff = dff[dff.fund_name.isin(filter_funds)]
-        else:
-            dff = dff[~dff.fund_name.isin(filter_funds)]
+        dff = dff[dff.fund_name.isin(filter_funds)]
     if filter_program:
-        if program_cond == 'include':
-            dff = dff[dff.program.isin(filter_program)]
-        else:
-            dff = dff[~dff.program.isin(filter_program)]
+        dff = dff[dff.program.isin(filter_program)]
     if filter_countries:
-        if domicile_country_cond == 'include':
-            dff = dff[dff.domicile_country.isin(filter_countries)]
-        else:
-            dff = dff[~dff.domicile_country.isin(filter_countries)]   
+        dff = dff[dff.domicile_country.isin(filter_countries)]   
     if filter_entry_round:
-        if entry_round_cond == 'include':
-            dff = dff[dff.entry_round.isin(filter_entry_round)]
-        else:
-            dff = dff[~dff.entry_round.isin(filter_entry_round)]
+        dff = dff[dff.entry_round.isin(filter_entry_round)]
     if filter_industries: 
         filter_col = dff.industries.apply(lambda x: any(item in x for item in filter_industries))
-       
-        if industries_cond == 'include':
-            dff = dff[filter_col]
-        else:
-            dff = dff[~filter_col]
+        dff = dff[filter_col]
+            
+    if dff.shape == (0, 0):
+        return dff_never_empty, True
 
-    
-        
 
     dff = dff.loc[dff.groupby(['display_name']).date.idxmax()]
     dff = dff.sort_values(metric, ascending=order)
@@ -574,27 +640,96 @@ industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry
             dff = dff[dff['industries']!='']
             if filter_industries:
                 filter_col = dff.industries.apply(lambda x: x in filter_industries)
-                if industries_cond == 'include':
-                    dff = dff[filter_col]
-                else:
-                    dff = dff[~filter_col]
+                dff = dff[filter_col]
     
         dff = dff.groupby(dimension, as_index=False).agg(create_groupby_object(dimension, metric))
         dff = dff.sort_values(metric, ascending=order)
         
-
-    
-
     if difference:
         new_colname = metric + '_actual'
         actual_dff[new_colname] = actual_dff[metric]
         dff = pd.merge(dff, actual_dff[[dimension, new_colname]], on=dimension, how='left')
-        print(dff.columns)
+        
         dff[metric] = dff[new_colname]-dff[metric]
         dff = dff.sort_values(metric, ascending=order)
 
+    return dff, False
 
-    return dff
+# def prepare_dataframe(dff, metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, filter_program, order, date, difference,
+# industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry_round_cond, program_cond):
+#     dff = dff.copy(deep=True)
+#     #print(date)
+#     if difference:
+#         actual_dff = prepare_dataframe(dff, metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, filter_program, order, None, None,
+#     industries_cond, display_name_cond, fund_name_cond, domicile_country_cond, entry_round_cond, program_cond)
+
+#     if date:        
+#         dff = dff.loc[(dff['cut_of_date'] <= date)]
+
+#     dff['industries'] = dff['industries'].str.replace('[\[\]"]', '', regex=True)
+#     dff['industries'] = dff['industries'].str.split(',')
+
+#     if filter_companies:
+#         if display_name_cond == 'include':
+#             dff = dff[dff.display_name.isin(filter_companies)]
+#         else:
+#             dff = dff[~dff.display_name.isin(filter_companies)]
+#     if filter_funds:
+#         if fund_name_cond == 'include':
+#             dff = dff[dff.fund_name.isin(filter_funds)]
+#         else:
+#             dff = dff[~dff.fund_name.isin(filter_funds)]
+#     if filter_program:
+#         if program_cond == 'include':
+#             dff = dff[dff.program.isin(filter_program)]
+#         else:
+#             dff = dff[~dff.program.isin(filter_program)]
+#     if filter_countries:
+#         if domicile_country_cond == 'include':
+#             dff = dff[dff.domicile_country.isin(filter_countries)]
+#         else:
+#             dff = dff[~dff.domicile_country.isin(filter_countries)]   
+#     if filter_entry_round:
+#         if entry_round_cond == 'include':
+#             dff = dff[dff.entry_round.isin(filter_entry_round)]
+#         else:
+#             dff = dff[~dff.entry_round.isin(filter_entry_round)]
+#     if filter_industries: 
+#         filter_col = dff.industries.apply(lambda x: any(item in x for item in filter_industries))
+       
+#         if industries_cond == 'include':
+#             dff = dff[filter_col]
+#         else:
+#             dff = dff[~filter_col]
+
+
+#     dff = dff.loc[dff.groupby(['display_name']).date.idxmax()]
+#     dff = dff.sort_values(metric, ascending=order)
+
+#     if (dimension != 'display_name'):
+#         if (dimension == 'industries'):
+#             dff = dff.explode('industries')
+#             dff = dff[dff['industries']!='']
+#             if filter_industries:
+#                 filter_col = dff.industries.apply(lambda x: x in filter_industries)
+#                 if industries_cond == 'include':
+#                     dff = dff[filter_col]
+#                 else:
+#                     dff = dff[~filter_col]
+    
+#         dff = dff.groupby(dimension, as_index=False).agg(create_groupby_object(dimension, metric))
+#         dff = dff.sort_values(metric, ascending=order)
+        
+#     if difference:
+#         new_colname = metric + '_actual'
+#         actual_dff[new_colname] = actual_dff[metric]
+#         dff = pd.merge(dff, actual_dff[[dimension, new_colname]], on=dimension, how='left')
+#         print(dff.columns)
+#         dff[metric] = dff[new_colname]-dff[metric]
+#         dff = dff.sort_values(metric, ascending=order)
+
+
+#     return dff
 
 if __name__ == '__main__':
     app.run(debug=True)

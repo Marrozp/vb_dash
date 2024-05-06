@@ -10,7 +10,7 @@ body {
 }
 
 html {
-    height: 1600px;
+    /*height: 1600px;*/
     font-family: Arial;
     background-color: #EAEEF7;
 }
@@ -181,7 +181,7 @@ h2 {
 }
 
 .sec-chart-h {
-    margin-top: 50px;
+    margin-top: -370px;
 }
 
 .date-picker {
@@ -226,6 +226,38 @@ input[type=checkbox] {
     width: 150px;
     display: none;
     font-weight: bold;
+}
+
+.no-data {
+    opacity: 0.8;
+    background-color: white;
+    position: relative;
+    top: -420px;
+    height: 420px;
+    width: 980px;
+    border: 4px solid red;
+    color: red;
+    font-size: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: -1;;
+}
+
+.no-data-show {
+    opacity: 0.8;
+    background-color: white;
+    position: relative;
+    top: -420px;
+    height: 420px;
+    width: 980px;
+    border: 4px solid red;
+    color: red;
+    font-size: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
 }
 
 /* width */
