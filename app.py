@@ -4,13 +4,18 @@ import plotly.express as px
 from datetime import date
 import pandas as pd
 import numpy as np
+# import locale
+# locale.setlocale(locale.LC_ALL, '')
 pd.options.display.multi_sparse = False
 
-df = pd.read_csv('custom_fields_and_new_metrics.csv')
+df = pd.read_csv('custom_fields.csv')
 
 df['date'] = pd.to_datetime(df['cut_of_date'], utc=True)
 df = df[df['display_name'] != 'Papaya Global (original investment in Azimo)']
-df['program'] = df['program'].str.replace('[\[\]"]', '', regex=True)
+custom_fields = ['program', 'female_founder', 'board_seat', 'source_of_introduction', 'deal_lead']
+for custom_field in custom_fields:
+    df[custom_field] = df[custom_field].str.replace('[\[\]"]', '', regex=True)
+# df['program'] = df['program'].str.replace('[\[\]"]', '', regex=True)
 
 # Replace NaN values in 'entry_round' column with 'Other'
 df['entry_round'].fillna('Other', inplace=True)
@@ -142,12 +147,17 @@ app.layout = html.Div(
                         html.H2('Select a metric'),
                         dcc.Dropdown(options=[
                             #{'label': 'MOIC', 'value': 'first_check_mo_ic'},
-                            {'label': 'IRR', 'value': 'irr'},
+                            {'label': 'Gross IRR', 'value': 'irr'},
                             {'label': 'Multiple', 'value': 'multiple'},
-                            {'label': 'AVG Round Size', 'value': 'round_size'},
-                            {'label': 'AVG Pre Money', 'value': 'pre_money'},
-                            {'label': 'AVG Post Money', 'value': 'post_money'},
-                            {'label': 'AVG Ownership', 'value': 'ownership'}
+                            {'label': 'Round Size', 'value': 'round_size'},
+                            {'label': 'Pre Money', 'value': 'pre_money'},
+                            {'label': 'Post Money', 'value': 'post_money'},
+                            {'label': 'Ownership Percentage', 'value': 'ownership'},
+                            {'label': 'Total Original Cost', 'value': 'total_original_cost'},
+                            {'label': 'Proceeds', 'value': 'proceeds'},
+                            {'label': 'Cash Income', 'value': 'cash_realized'},
+                            {'label': 'Current Fair Value', 'value': 'current_share_value'},
+                            {'label': 'Total Return', 'value': 'total_return'}
                             #{'label': 'TVPI', 'value': 'multiple'},
                             #{'label': 'DPI', 'value': 'multiple'},
                             #{'label': 'RVPI', 'value': 'multiple'},
@@ -167,7 +177,15 @@ app.layout = html.Div(
                             {'label': 'Fund', 'value': 'fund_name'},
                             {'label': 'Country', 'value': 'domicile_country'},
                             {'label': 'Entry Round', 'value': 'entry_round'},
-                            {'label': 'Program', 'value': 'program'}
+                            {'label': 'Program', 'value': 'program'},
+                            {'label': 'Latest Investment Stage', 'value': 'latest_investment_stage'},
+                            {'label': 'Female Founder', 'value': 'female_founder'},
+                            {'label': 'Board Seat', 'value': 'board_seat'},
+                            {'label': 'Source of Introduction', 'value': 'source_of_introduction'},
+                            {'label': 'Deal Lead', 'value': 'deal_lead'},
+                            {'label': 'Founder Expertise', 'value': 'deal_lead'},
+                            {'label': 'Notable co-investor', 'value': 'deal_lead'},
+                            {'label': 'Sub-sector', 'value': 'deal_lead'}
                             #{'label': 'Investment manager', 'value': 'entry_round'},
                             #{'label': 'Source of introduction', 'value': 'entry_round'},
                             #{'label': 'Board seats', 'value': 'entry_round'},
@@ -534,15 +552,18 @@ def formatFigure(dff, metric, dimension):
     for i in range(len(dff)):
         value = dff[metric].iloc[i]
         value = round(value, 2)
+        #value = round(value) if metric in ['total_original_cost', 'proceeds', 'cash_realized', 'current_share_value', 'total_return', 'round_size', 'pre_money', 'post_money'] else round(value, 2)
         shift_direction = -1 if value >= 0 else 1
         display_name = dff[dimension].iloc[i]
         fig.add_annotation(
             x=value,
             y=i,
             text=value,
+            #text=locale.format_string("%d", round(value), grouping=True) if metric in ['total_original_cost', 'proceeds', 'cash_realized', 'current_share_value', 'total_return', 'round_size', 'pre_money', 'post_money'] else round(value, 2),
+            #text=locale.format_string("%d", value, grouping=True),
             #text=f'{value} %',
             showarrow=False,
-            xshift=40,
+            xshift=50,
             font=dict(color='black', size=14)
         )
 
@@ -592,8 +613,13 @@ def create_groupby_object(dimension, metric):
             'display_name': lambda x: ',<br>    '.join(x.unique()),
             'fund_name': lambda x: ',<br>    '.join(x.unique()),
             'domicile_country': lambda x: ',<br>    '.join(x.unique()),
+            'latest_investment_stage': lambda x: ',<br> '.join(x.dropna().unique()) if x.dropna().any() else '',
             'entry_round': lambda x: ',<br> '.join(x.dropna().unique()) if x.dropna().any() else '',
-            'program': lambda x: ',<br> '.join(map(str, str(x.dropna().unique()).replace('[', '').replace(']', '').replace("'", '').split(' ')))
+            'program': lambda x: ',<br> '.join(map(str, str(x.dropna().unique()).replace('[', '').replace(']', '').replace("'", '').split(' '))),
+            'female_founder': lambda x: ',<br> '.join(map(str, str(x.dropna().unique()).replace('[', '').replace(']', '').replace("'", '').split(' '))),
+            'board_seat': lambda x: ',<br> '.join(map(str, str(x.dropna().unique()).replace('[', '').replace(']', '').replace("'", '').split(' '))),
+            'source_of_introduction': lambda x: ',<br> '.join(map(str, str(x.dropna().unique()).replace('[', '').replace(']', '').replace("'", '').split(' '))),
+            'deal_lead': lambda x: ',<br> '.join(map(str, str(x.dropna().unique()).replace('[', '').replace(']', '').replace("'", '').split(' ')))
             #str(x.dropna().unique()).split(' ') #',<br>    '.join(str(x.dropna().unique()))
             }
     object_to_return.pop(dimension)
@@ -652,6 +678,9 @@ def prepare_dataframe(dff, metric, dimension, filter_industries, filter_companie
         
         dff[metric] = dff[new_colname]-dff[metric]
         dff = dff.sort_values(metric, ascending=order)
+    
+    # Make sure no nans are in the figure
+    dff = dff.dropna(subset=[metric])
 
     return dff, False
 
