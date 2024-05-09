@@ -14,21 +14,21 @@ df['date'] = pd.to_datetime(df['cut_of_date'], utc=True)
 df = df[df['display_name'] != 'Papaya Global (original investment in Azimo)']
 custom_fields = ['program', 'female_founder', 'board_seat', 'source_of_introduction', 'deal_lead']
 for custom_field in custom_fields:
-    df[custom_field] = df[custom_field].str.replace('[\[\]"]', '', regex=True)
+    df[custom_field] = df[custom_field].str.replace(r'[\[\]"]', '', regex=True)
 # df['program'] = df['program'].str.replace('[\[\]"]', '', regex=True)
 
 # Replace NaN values in 'entry_round' column with 'Other'
-df['entry_round'].fillna('Other', inplace=True)
+df['entry_round'] = df['entry_round'].fillna('Other')
 
 # Replace NaN values in 'program' column with 'None'
-df['program'].fillna('None', inplace=True)
+df['program'] = df['program'].fillna('None')
 
 # Add None industry to all industry-less companies
 #df['industries'] = df['industries'].apply(lambda x: ['None'] if x == [] else x)
 #df.loc[df['industries'] == [], 'industries'] = ['None']
 
 def parse_industries(column):
-    column = column.str.replace('[\[\]"]', '', regex=True)
+    column = column.str.replace(r'[\[\]"]', '', regex=True)
     column = column.apply(lambda x: 'None' if x == '' else x)
     concatenated_string = column.str.cat(sep=',')
     result = set(concatenated_string.split(','))
@@ -499,7 +499,7 @@ def update_graph(metric, dimension, filter_industries, filter_companies, filter_
     else:
         no_data_rect_class = 'no-data'
     
-    print(no_data_rect_class)
+    #print(no_data_rect_class)
 
     return formatFigure(dff, metric, dimension), [html.Div('No data found for this combination of filters', id='no-data-rect', className=no_data_rect_class)]
 
@@ -631,12 +631,12 @@ def prepare_dataframe(dff, metric, dimension, filter_industries, filter_companie
     dff_never_empty = dff.copy(deep=True)
     #print(date)
     if difference:
-        actual_dff = prepare_dataframe(dff, metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, filter_program, order, None, None)
+        actual_dff = prepare_dataframe(dff, metric, dimension, filter_industries, filter_companies, filter_funds, filter_countries, filter_entry_round, filter_program, order, None, None)[0]
 
     if date:        
         dff = dff.loc[(dff['cut_of_date'] <= date)]
 
-    dff['industries'] = dff['industries'].str.replace('[\[\]"]', '', regex=True)
+    dff['industries'] = dff['industries'].str.replace(r'[\[\]"]', '', regex=True)
     dff['industries'] = dff['industries'].str.split(',')
 
     if filter_companies:
@@ -670,7 +670,8 @@ def prepare_dataframe(dff, metric, dimension, filter_industries, filter_companie
     
         dff = dff.groupby(dimension, as_index=False).agg(create_groupby_object(dimension, metric))
         dff = dff.sort_values(metric, ascending=order)
-        
+
+    
     if difference:
         new_colname = metric + '_actual'
         actual_dff[new_colname] = actual_dff[metric]
